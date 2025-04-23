@@ -12,6 +12,11 @@ LOKI            := grafana/loki:3.4.0
 PROMTAIL        := grafana/promtail:3.4.0
 
 KIND_CLUSTER    := garage-sale-cluster
+SALES_APP       := sales
+BASE_IMAGE_NAME := garage-sale
+VERSION         := "0.0.1-$(shell git rev-parse --short HEAD)"
+SALES_IMAGE     := $(BASE_IMAGE_NAME)/$(SALES_APP):$(VERSION)
+
 
 # ==============================================================================
 # Install dependencies
@@ -42,6 +47,19 @@ dev-docker:
 	docker pull $(LOKI) & \
 	docker pull $(PROMTAIL) & \
 	wait;
+
+# ==============================================================================
+# Building containers
+
+build: sales
+
+sales:
+	docker build \
+		-f zarf/docker/dockerfile.sales \
+		-t $(SALES_IMAGE) \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		.
 
 # ==============================================================================
 # Running from within k8s/kind
