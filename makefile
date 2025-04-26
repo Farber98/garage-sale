@@ -12,9 +12,10 @@ LOKI            := grafana/loki:3.4.0
 PROMTAIL        := grafana/promtail:3.4.0
 
 KIND_CLUSTER    := garage-sale-cluster
+NAMESPACE       := sales-system
 SALES_APP       := sales
 BASE_IMAGE_NAME := garage-sale
-VERSION         := "0.0.1-$(shell git rev-parse --short HEAD)"
+VERSION         := "0.0.1"
 SALES_IMAGE     := $(BASE_IMAGE_NAME)/$(SALES_APP):$(VERSION)
 
 
@@ -57,7 +58,7 @@ sales:
 	docker build \
 		-f zarf/docker/dockerfile.sales \
 		-t $(SALES_IMAGE) \
-		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_REF=$(shell git rev-parse --short HEAD) \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
 
@@ -80,6 +81,36 @@ dev-down:
 dev-status:
 	watch -n 2 kubectl get pods -o wide --all-namespaces
 
+dev-load:
+	kind load docker-image $(SALES_IMAGE) --name $(KIND_CLUSTER)
+
+dev-apply:
+	kustomize build zarf/k8s/dev/sales | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(SALES_APP) --timeout=120s --for=condition=Ready
+
+# Restart POD. 
+dev-restart:
+	kubectl rollout restart deployment $(SALES_APP) --namespace=$(NAMESPACE)
+
+dev-run: 
+	build dev-up dev-load dev-apply
+
+# When updating code we need to load and restart.
+dev-update: build dev-load dev-restart
+
+# When updating yaml, we need to load and apply.
+dev-update-apply: build dev-load dev-apply
+
+dev-logs:
+	kubectl logs --namespace=$(NAMESPACE) -l app=$(SALES_APP) --all-containers=true -f --tail=100 --max-log-requests=6 | go run api/tooling/logfmt/main.go -service=$(SALES_APP)
+
+# Info about Deployment of sales POD
+dev-describe-deployment:
+	kubectl describe deployment --namespace=$(NAMESPACE) $(SALES_APP)
+
+# Info about running Sales POD
+dev-describe-sales:
+	kubectl describe pod --namespace=$(NAMESPACE) -l app=$(SALES_APP)
 # ==============================================================================
 # Modules support
 
