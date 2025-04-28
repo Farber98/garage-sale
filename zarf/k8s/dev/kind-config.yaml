@@ -6,3 +6,12 @@ nodes:
   # Sales-Api
   - containerPort: 3000
     hostPort: 3000
+  # Sales-Api debug
+  - containerPort: 3010
+    hostPort: 3010
+  # Metrics
+  - containerPort: 4000
+    hostPort: 4000
+  # Metrics debug
+  - containerPort: 4010
+    hostPort: 4010
