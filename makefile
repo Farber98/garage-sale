@@ -134,5 +134,8 @@ tidy:
 # ==============================================================================
 # Testing Endpoints
 
-curl:
-	curl -il -X GET http://localhost:3000/test
+curl-liveness:
+	curl -il -X GET http://localhost:3000/liveness
+
+curl-readiness:
+	curl -il -X GET http://localhost:3000/readiness
