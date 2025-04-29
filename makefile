@@ -130,3 +130,9 @@ run:
 tidy: 
 	go mod tidy
 	go mod vendor
+
+# ==============================================================================
+# Testing Endpoints
+
+curl:
+	curl -il -X GET http://localhost:3000/test

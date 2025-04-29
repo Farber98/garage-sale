@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Farber98/garage-sale/api/services/api/debug"
+	"github.com/Farber98/garage-sale/api/services/sales/mux"
 	"github.com/Farber98/garage-sale/foundation/logger"
 	"github.com/ardanlabs/conf/v3"
 )
@@ -113,7 +114,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      nil,
+		Handler:      mux.WebAPI(),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,
