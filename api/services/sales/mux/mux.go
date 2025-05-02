@@ -1,16 +1,17 @@
 package mux
 
 import (
-	"net/http"
+	"os"
 
 	"github.com/Farber98/garage-sale/api/services/sales/route/sys/checkapi"
+	"github.com/Farber98/garage-sale/foundation/web"
 )
 
 // WebAPI constructs a http.Handler with all app routes bound
-func WebAPI() *http.ServeMux {
-	mux := http.NewServeMux()
+func WebAPI(shutdown chan os.Signal) *web.App {
+	app := web.NewApp(shutdown)
 
-	checkapi.Routes(mux)
+	checkapi.Routes(app)
 
-	return mux
+	return app
 }
