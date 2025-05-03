@@ -3,8 +3,8 @@ package mux
 import (
 	"os"
 
+	"github.com/Farber98/garage-sale/api/services/api/mid"
 	"github.com/Farber98/garage-sale/api/services/sales/route/sys/checkapi"
-	"github.com/Farber98/garage-sale/app/mid"
 	"github.com/Farber98/garage-sale/foundation/logger"
 	"github.com/Farber98/garage-sale/foundation/web"
 )
