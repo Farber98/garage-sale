@@ -15,6 +15,7 @@ import (
 	"github.com/Farber98/garage-sale/api/services/api/debug"
 	"github.com/Farber98/garage-sale/api/services/sales/mux"
 	"github.com/Farber98/garage-sale/foundation/logger"
+	"github.com/Farber98/garage-sale/foundation/web"
 	"github.com/ardanlabs/conf/v3"
 )
 
@@ -30,7 +31,7 @@ func main() {
 	}
 
 	traceIDFn := func(ctx context.Context) string {
-		return ""
+		return web.GetTraceID(ctx)
 	}
 
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "SALES", traceIDFn, events)

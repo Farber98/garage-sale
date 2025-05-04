@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type HandlerFunc func(context.Context, http.ResponseWriter, *http.Request) error
@@ -29,7 +32,14 @@ func (app *App) HandleFunc(pattern string, handler HandlerFunc, mw ...MidHandler
 
 	// Callback func to inject custom logic
 	h := func(w http.ResponseWriter, r *http.Request) {
-		if err := handler(r.Context(), w, r); err != nil {
+		v := Values{
+			TraceID: uuid.NewString(),
+			Now:     time.Now().UTC(),
+		}
+
+		ctx := setValues(r.Context(), &v)
+
+		if err := handler(ctx, w, r); err != nil {
 			fmt.Println(err)
 		}
 	}
