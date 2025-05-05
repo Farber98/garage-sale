@@ -142,3 +142,6 @@ curl-readiness:
 
 curl-error:
 	curl -il -X GET http://localhost:3000/testerror
+
+curl-panic:
+	curl -il -X GET http://localhost:3000/testpanic

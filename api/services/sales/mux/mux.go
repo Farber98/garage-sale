@@ -11,7 +11,7 @@ import (
 
 // WebAPI constructs a http.Handler with all app routes bound
 func WebAPI(log *logger.Logger, shutdown chan os.Signal) *web.App {
-	app := web.NewApp(shutdown, mid.Logger(log), mid.Error(log))
+	app := web.NewApp(shutdown, mid.Logger(log), mid.Error(log), mid.Panic())
 
 	checkapi.Routes(app)
 
