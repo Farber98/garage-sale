@@ -2,9 +2,10 @@ package web
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
 	"os"
+	"syscall"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,6 +27,10 @@ func NewApp(shutdown chan os.Signal, mw ...MidHandler) *App {
 	}
 }
 
+func (app *App) SignalShutdown() {
+	app.shutdown <- syscall.SIGTERM
+}
+
 func (app *App) HandleFunc(pattern string, handler HandlerFunc, mw ...MidHandler) {
 	handler = wrapMiddleware(mw, handler)
 	handler = wrapMiddleware(app.mw, handler)
@@ -40,9 +45,23 @@ func (app *App) HandleFunc(pattern string, handler HandlerFunc, mw ...MidHandler
 		ctx := setValues(r.Context(), &v)
 
 		if err := handler(ctx, w, r); err != nil {
-			fmt.Println(err)
+			if validateError(err) {
+				app.SignalShutdown()
+				return
+			}
 		}
 	}
 
 	app.ServeMux.HandleFunc(pattern, h)
+}
+
+func validateError(err error) bool {
+	switch {
+	case errors.Is(err, syscall.EPIPE):
+		return false
+	case errors.Is(err, syscall.ECONNRESET):
+		return false
+	}
+
+	return true
 }
