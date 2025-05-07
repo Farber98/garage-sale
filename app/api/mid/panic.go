@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"runtime/debug"
+
+	"github.com/Farber98/garage-sale/app/api/metrics"
 )
 
 // Panics recovers from panics and converts the panic to an error so it is reported
@@ -14,6 +16,7 @@ func Panics(ctx context.Context, handler Handler) (err error) {
 		if rec := recover(); rec != nil {
 			trace := debug.Stack()
 			err = fmt.Errorf("PANIC [%v] TRACE [%s]", rec, string(trace))
+			metrics.AddPanics(ctx)
 		}
 	}()
 

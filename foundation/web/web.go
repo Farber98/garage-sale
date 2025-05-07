@@ -55,6 +55,27 @@ func (app *App) HandleFunc(pattern string, handler HandlerFunc, mw ...MidHandler
 	app.ServeMux.HandleFunc(pattern, h)
 }
 
+func (app *App) HandleFuncNoMiddleware(pattern string, handler HandlerFunc, mw ...MidHandler) {
+	// Callback func to inject custom logic
+	h := func(w http.ResponseWriter, r *http.Request) {
+		v := Values{
+			TraceID: uuid.NewString(),
+			Now:     time.Now().UTC(),
+		}
+
+		ctx := setValues(r.Context(), &v)
+
+		if err := handler(ctx, w, r); err != nil {
+			if validateError(err) {
+				app.SignalShutdown()
+				return
+			}
+		}
+	}
+
+	app.ServeMux.HandleFunc(pattern, h)
+}
+
 func validateError(err error) bool {
 	switch {
 	case errors.Is(err, syscall.EPIPE):
